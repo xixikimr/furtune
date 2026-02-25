@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔮 宇宙運勢導航</title>
     <style>
+        /* 修正：body 不再隱藏溢出，確保可以滑動 */
         body { 
             font-family: sans-serif; 
             background: linear-gradient(to bottom, #a1c4fd 0%, #1e3c72 40%, #050505 100%); 
@@ -15,20 +16,45 @@
             align-items: center; 
             min-height: 100vh; 
             margin: 0; 
-            padding: 20px; 
+            padding: 40px 20px; /* 增加上下間距，防止卡片貼邊 */
             box-sizing: border-box; 
+            position: relative;
+        }
+
+        /* 星空容器：固定在背景，不干擾內容 */
+        .stars-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 0.9; transform: scale(1); }
         }
 
         .card { 
-            background: rgba(10, 20, 40, 0.1); 
-            backdrop-filter: blur(10px); 
+            background: rgba(10, 20, 40, 0.2); 
+            backdrop-filter: blur(12px); 
             padding: 30px; 
             border-radius: 40px; 
             width: 100%; 
             max-width: 450px; 
             text-align: center; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             position: relative;
+            z-index: 10;
+            margin: auto; /* 確保在垂直方向也居中 */
         }
 
         .card::before {
@@ -38,9 +64,7 @@
             border-radius: 40px; 
             padding: 6px; 
             background: linear-gradient(45deg, #ffffff, #d4af37, #fcf6ba, #ffffff);
-            -webkit-mask: 
-                linear-gradient(#fff 0 0) content-box, 
-                linear-gradient(#fff 0 0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             pointer-events: none;
@@ -57,20 +81,20 @@
         }
 
         .section { 
-            margin: 18px 0; padding: 15px; background: rgba(0, 0, 0, 0.2); 
+            margin: 18px 0; padding: 15px; background: rgba(0, 0, 0, 0.3); 
             border-radius: 20px; text-align: left; border-left: 5px solid #d4af37;
         }
 
-        .label { font-size: 11px; color: #ddd; margin-bottom: 5px; }
-        .value { font-size: 18px; font-weight: bold; }
+        .label { font-size: 11px; color: #ccc; margin-bottom: 5px; }
+        .value { font-size: 18px; font-weight: bold; line-height: 1.4; }
         
         .tarot-name { color: #fcf6ba; } 
         .tarot-desc { font-size: 14px; margin-top: 5px; line-height: 1.5; font-style: italic; color: #eee; }
-        .todo-icon { color: #2e7d32; font-weight: bold; margin-right: 4px; }
-        .todo-val { color: #2e7d32; } 
-        .notodo-icon { color: #c62828; font-weight: bold; margin-right: 4px; }
-        .notodo-val { color: #c62828; } 
-        .advice-val { color: #f1fa8c; font-style: normal; } 
+        .todo-icon { color: #4caf50; font-weight: bold; margin-right: 4px; }
+        .todo-val { color: #81c784; } 
+        .notodo-icon { color: #f44336; font-weight: bold; margin-right: 4px; }
+        .notodo-val { color: #e57373; } 
+        .advice-val { color: #fff176; font-style: normal; } 
 
         .main-btn { 
             background: linear-gradient(45deg, #ffffff, #d4af37, #fcf6ba); 
@@ -80,16 +104,17 @@
         }
         .main-btn:active { transform: scale(0.95); }
 
-        /* 新增：重新測驗的按鈕樣式 */
         .reset-btn {
             background: transparent; color: #aaa; border: 1px solid #555;
             padding: 8px 15px; border-radius: 20px; font-size: 12px;
             cursor: pointer; margin-top: 20px; transition: 0.3s;
+            display: inline-block;
         }
-        .reset-btn:hover { color: #fff; border-color: #fff; }
     </style>
 </head>
 <body>
+
+<div class="stars-container" id="starsContainer"></div>
 
 <div class="card">
     <div id="inputArea">
@@ -107,34 +132,42 @@
 
     <div id="resultArea" style="display: none;">
         <div id="greeting" style="font-weight: bold; margin: 20px 0; font-size: 18px;"></div>
-        
         <div class="section">
             <div class="label">🎴 今日宇宙塔羅</div>
             <div id="tarot" class="value tarot-name"></div>
             <div id="tarotDesc" class="tarot-desc"></div>
         </div>
-
-        <div class="section" style="border-left-color: #2e7d32;">
+        <div class="section" style="border-left-color: #4caf50;">
             <div class="label"><span class="todo-icon">○</span> 今日宜</div>
             <div id="todo" class="value todo-val"></div>
         </div>
-
-        <div class="section" style="border-left-color: #c62828;">
+        <div class="section" style="border-left-color: #f44336;">
             <div class="label"><span class="notodo-icon">✕</span> 今日忌</div>
             <div id="notodo" class="value notodo-val"></div>
         </div>
-
         <div class="section" style="border-left-color: #ffffff;">
             <div class="label">💡 靈魂私語</div>
             <div id="soulAdvice" class="value advice-val"></div>
         </div>
-
         <button class="reset-btn" onclick="resetForm()">返回修改</button>
     </div>
 </div>
 
 <script>
-    // 資料庫維持不變
+    const container = document.getElementById('starsContainer');
+    for (let i = 0; i < 80; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = (Math.random() * 3 + 2) + 'px';
+        star.style.width = size;
+        star.style.height = size;
+        star.style.top = Math.random() * 100 + '%';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
+        star.style.animationDelay = Math.random() * 5 + 's';
+        container.appendChild(star);
+    }
+
     const tarotData = [{id:0,name:"0. 愚者",desc:"純真與冒險。放下恐懼，勇敢踏出舒適圈。"},{id:1,name:"1. 魔術師",desc:"萬事備。握有成功的資源，行動就能成真。"},{id:2,name:"2. 女祭司",desc:"直覺與智慧。別急著行動，聽從內心潛意識。"},{id:3,name:"3. 皇后",desc:"豐盛與美。吸引力極強，適合享受感官與藝術。"},{id:4,name:"4. 皇帝",desc:"紀律與權威。建立秩序，自律將帶妳走向成功。"},{id:5,name:"5. 教皇",desc:"引導與傳統。尋求長輩建議，遵守約定會帶來好運。"},{id:6,name:"6. 戀人",desc:"和諧與選擇。在關係中找到平衡，相信心靈契合。"},{id:7,name:"7. 戰車",desc:"意志與勝利。下定決心，沒有什麼能阻擋妳。"},{id:8,name:"8. 力量",desc:"勇氣與韌性。用溫和的力量化解僵局，柔能克剛。"},{id:9,name:"9. 隱士",desc:"內省與沉澱。答案不在外界，適合獨處思考。"},{id:10,name:"10. 命運之輪",desc:"轉機與翻轉。接受突發狀況，那是幸運的開始。"},{id:11,name:"11. 正義",desc:"公平與平衡。誠實面對，付出多少就回收多少。"},{id:12,name:"12. 倒吊人",desc:"等待與換位。暫時的停滯是為了看見更廣視野。"},{id:13,name:"13. 死神",desc:"結束與重生。割捨舊物，為新機會騰出空間。"},{id:14,name:"14. 節制",desc:"調和與平和。控制情緒，在極端中尋找平衡點。"},{id:15,name:"15. 惡魔", desc: "覺察束縛。看清慾望，今天是打破枷鎖的日子。"},{id:16,name:"16. 高塔",desc:"震撼與重建。拆除不穩固，建立更穩定的未來。"},{id:17,name:"17. 星星",desc:"希望與療癒。願望正在萌芽，保持正向心態。"},{id:18,name:"18. 月亮",desc:"不安與幻象。穿透恐懼，看見潛意識的暗示。"},{id:19,name:"19. 太陽",desc:"成功與快樂。陽光普照，開朗會感染身邊的人。"},{id:20,name:"20. 審判",desc:"重生與覺醒。接受召喚，迎接新的人生層次。"},{id:21,name:"21. 世界",desc:"圓滿與達成。完美落幕，準備進入全新篇章。"}];
     const adviceList = ["直覺今天特別靈敏。","有些事急不得，慢慢來比較快。","別讓別人的情緒污染妳的心。","今天妳是宇宙的寵兒。","所有的安排都是最好的安排。","今天的妳比昨天更出色。","給自己一點犯錯的空間。","世界很大，煩惱其實很小。","休息是為了走更遠的路。","笑容是妳最強的開運物。","不要為還沒發生的事焦慮。","妳的善良值得被溫柔對待。","專注於當下，奇蹟就會發生。","有些決定需要勇氣，妳有的。","保持好奇心，生活會更有趣。","今天的挑戰是未來的養分。","別忘了給腦公一個微笑。","內心的平靜才是真正的力量。","妳不需要完美，只需要真實。","宇宙正聽著妳的心聲。","放手不代表失敗，是種選擇。","今天適合聽聽內心的聲音。","相信自己的光，能照亮陰影。","小小的進步也是進步。","對自己溫柔，世界也會溫柔。","今天的陽光為妳而燦爛。","不需要跟別人比較。","每朵花都有自己的花期。","深呼吸，把壓力都吐出去。","妳的潛力超乎想像。","接受不完美的自己。","今天是重啟的好日子。","少一點抱怨，多一點行動。","智慧藏在安靜的時刻。","愛自己是終生浪漫的開始。","換個角度，世界就不一樣。","簡單生活，心靈最富足。","今天的妳擁有無限可能。","保持善良，好運自來。","妳就是自己的救世主。","生活需要一點儀式感。","別人的話參考就好。","相信時間會給妳答案。","跨出舒適圈，發現驚喜。","今天適合清理心靈垃圾。","把焦點放在擁有的東西上。","妳的溫暖能治癒身邊的人。","不要害怕改變。","宇宙愛妳，我也愛妳。"];
     const pool = ["喝手搖飲","大口吃肉","買新衣服","整理房間","跟貓說話","深呼吸","早點睡覺","聯絡老友","去圖書館","換個髮型","大笑三聲","冥想五分","買份禮物","寫日記","修剪指甲","換新床單","運動排汗","聽音樂","看場電影","嘗試新菜","讚美別人","斷捨離","發呆放空","存一點錢","勇敢拒絕","主動道歉","練習瑜伽","喝溫開水","聽PODCAST","逛花市","洗泡泡浴","拍美照","抱抱腦公","看風景","準時下班","早起吃早餐","練習感恩","閱讀新書","玩場遊戲","整理相簿","唱歌紓壓","點香氛燈","吃水果","喝熱可可","做伸展操","買束鮮花","研究星盤","修剪頭髮","寫張卡片","對鏡子笑"];
@@ -147,23 +180,19 @@
         const name = nameInput === "" ? "旅人" : nameInput;
         const bday = document.getElementById('userBirthday').value;
         if(!bday) { alert("請先選取您的生日喔！"); return; }
-        
-        // 核心改動：隱藏輸入區，顯示結果區
         document.getElementById('inputArea').style.display = 'none';
         document.getElementById('resultArea').style.display = 'block';
-
+        window.scrollTo(0, 0); // 切換時自動回到頂端
         const today = new Date();
         const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
         const bdaySeed = getSum(bday);
         const masterSeed = dateSeed + bdaySeed;
         let tarotNum = (getSum(today.toISOString().split('T')[0]) + bdaySeed);
         while (tarotNum > 21) tarotNum = tarotNum.toString().split('').reduce((a, b) => a + parseInt(b), 0);
-        
         const card = tarotData[tarotNum];
         const todoIdx = Math.floor(seededRandom(masterSeed) * pool.length);
         const notodoIdx = Math.floor(seededRandom(masterSeed + 7) * pool.length);
         const adviceIdx = Math.floor(seededRandom(masterSeed + 13) * adviceList.length);
-        
         document.getElementById('greeting').innerText = `✨ ${name}，宇宙今日啟示：`;
         document.getElementById('tarot').innerText = card.name;
         document.getElementById('tarotDesc').innerText = card.desc;
@@ -172,10 +201,10 @@
         document.getElementById('soulAdvice').innerText = adviceList[adviceIdx];
     }
 
-    // 重置功能：讓使用者可以回來重新輸入
     function resetForm() {
         document.getElementById('inputArea').style.display = 'block';
         document.getElementById('resultArea').style.display = 'none';
+        window.scrollTo(0, 0);
     }
 </script>
 
