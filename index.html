@@ -217,7 +217,7 @@
         const p = pre[Math.floor(seededRandom(masterSeed) * pre.length)];
         const m = mid[Math.floor(seededRandom(masterSeed + 3) * mid.length)];
         const s = suf[Math.floor(seededRandom(masterSeed + 6) * suf.length)];
-        document.getElementById('soulAdvice').innerText = `${p}${m}${s}。`;
+        document.getElementById('soulAdvice').innerText = `${p}${m}，${s}。`;
 
         document.getElementById('greeting').innerText = `✨ ${name}，宇宙此刻啟示：`;
         renderMoods();
