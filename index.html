@@ -125,14 +125,14 @@
         <div id="greeting" style="font-weight: bold; margin: 20px 0; font-size: 18px;"></div>
         
         <div class="section">
-            <div class="label">🎴 今日塔羅牌義</div>
+            <div class="label">🎴 今日塔羅牌義 (日更)</div>
             <div id="tarot" class="value" style="color: #fcf6ba;"></div>
             <div id="tarotDesc" style="font-size: 14px; margin-top: 8px; line-height: 1.6; color: #eee; font-style: italic;"></div>
         </div>
 
-        <div class="section" style="border-left-color: #4caf50;"><div class="label">○ 此刻宜</div><div id="todo" class="value" style="color:#81c784"></div></div>
-        <div class="section" style="border-left-color: #f44336;"><div class="label">✕ 此刻忌</div><div id="notodo" class="value" style="color:#e57373"></div></div>
-        <div class="section" style="border-left-color: #ffffff;"><div class="label">💡 靈魂私語</div><div id="soulAdvice" class="value" style="color:#fff176"></div></div>
+        <div class="section" style="border-left-color: #4caf50;"><div class="label">○ 今日宜</div><div id="todo" class="value" style="color:#81c784"></div></div>
+        <div class="section" style="border-left-color: #f44336;"><div class="label">✕ 今日忌</div><div id="notodo" class="value" style="color:#e57373"></div></div>
+        <div class="section" style="border-left-color: #ffffff;"><div class="label">💡 靈魂私語 (時更)</div><div id="soulAdvice" class="value" style="color:#fff176"></div></div>
 
         <div class="mood-selector">
             <div class="mood-title">選一個當下的心情符號</div>
@@ -200,23 +200,30 @@
         const dateSeed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
         const hourSeed = now.getHours();
         const bdaySum = bday.split('-').reduce((a, b) => a + parseInt(b), 0);
-        const masterSeed = dateSeed + hourSeed + bdaySum;
+        
+        // 邏輯 A: 日期 + 生日 (固定項目)
+        const dailySeed = dateSeed + bdaySum;
+        // 邏輯 B: 日期 + 小時 + 生日 (隨時變動項目)
+        const hourlySeed = dateSeed + hourSeed + bdaySum;
 
         document.getElementById('inputArea').style.display = 'none';
         document.getElementById('resultArea').style.display = 'block';
 
-        const tIdx = masterSeed % 22;
+        // 塔羅 (日更)
+        const tIdx = dailySeed % 22;
         document.getElementById('tarot').innerText = tarotData[tIdx].name;
         document.getElementById('tarotDesc').innerText = tarotData[tIdx].desc;
 
-        const todoIdx = Math.floor(seededRandom(masterSeed) * pool.length);
-        const notodoIdx = Math.floor(seededRandom(masterSeed + 7) * pool.length);
+        // 宜忌 (日更)
+        const todoIdx = Math.floor(seededRandom(dailySeed) * pool.length);
+        const notodoIdx = Math.floor(seededRandom(dailySeed + 7) * pool.length);
         document.getElementById('todo').innerText = pool[todoIdx];
         document.getElementById('notodo').innerText = pool[notodoIdx === todoIdx ? (notodoIdx + 1) % pool.length : notodoIdx];
 
-        const p = pre[Math.floor(seededRandom(masterSeed) * pre.length)];
-        const m = mid[Math.floor(seededRandom(masterSeed + 3) * mid.length)];
-        const s = suf[Math.floor(seededRandom(masterSeed + 6) * suf.length)];
+        // 靈魂私語 (時更) + 加上逗號
+        const p = pre[Math.floor(seededRandom(hourlySeed) * pre.length)];
+        const m = mid[Math.floor(seededRandom(hourlySeed + 3) * mid.length)];
+        const s = suf[Math.floor(seededRandom(hourlySeed + 6) * suf.length)];
         document.getElementById('soulAdvice').innerText = `${p}${m}，${s}。`;
 
         document.getElementById('greeting').innerText = `✨ ${name}，宇宙此刻啟示：`;
