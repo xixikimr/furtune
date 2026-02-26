@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔮 宇宙運勢導航 (奢華終極版)</title>
+    <title>🔮 宇宙運勢導航</title>
     <style>
         body { 
             font-family: sans-serif; 
@@ -42,6 +42,29 @@
             50% { opacity: 0.9; transform: scale(1); }
         }
 
+        /* 修正後：純淨版左下角計數器 */
+        .visitor-counter {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* 改為靠左對齊 */
+            gap: 2px;
+            opacity: 0.8;
+        }
+        .visitor-label {
+            font-size: 8px;
+            color: rgba(212, 175, 55, 0.7);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .hits-img {
+            /* 移除過濾器，讓它呈現原生的乾淨外觀 */
+            height: 16px;
+        }
+
         .card { 
             background: rgba(10, 20, 40, 0.2); 
             backdrop-filter: blur(15px); 
@@ -53,6 +76,8 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             position: relative;
             z-index: 10;
+            /* 防止與左下角統計數字重疊 */
+            margin-bottom: 60px; 
         }
 
         .card::before {
@@ -105,6 +130,11 @@
 
 <div class="stars-container" id="starsContainer"></div>
 
+<div class="visitor-counter">
+    <div class="visitor-label">Global Access</div>
+    <img class="hits-img" src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fxixikimr.github.io%2Ffurtune%2F&count_bg=%2300000000&title_bg=%2300000000&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=true" />
+</div>
+
 <div class="card">
     <div id="inputArea">
         <h1>✨ 宇宙運勢導航</h1>
@@ -123,14 +153,14 @@
         <div id="greeting" style="font-weight: bold; margin: 20px 0; font-size: 18px;"></div>
         
         <div class="section">
-            <div class="label">🎴 今日塔羅牌釋義</div>
+            <div class="label">🎴 今日卡牌意象</div>
             <div id="tarot" class="value" style="color: #fcf6ba;"></div>
             <div id="tarotDesc" style="font-size: 14px; margin-top: 8px; line-height: 1.6; color: #eee; font-style: italic;"></div>
         </div>
 
         <div class="section" style="border-left-color: #4caf50;"><div class="label">○ 今日宜</div><div id="todo" class="value" style="color:#81c784"></div></div>
         <div class="section" style="border-left-color: #f44336;"><div class="label">✕ 今日忌</div><div id="notodo" class="value" style="color:#e57373"></div></div>
-        <div class="section" style="border-left-color: #ffffff;"><div class="label">💡 此刻靈魂私語</div><div id="soulAdvice" class="value" style="color:#fff176"></div></div>
+        <div class="section" style="border-left-color: #ffffff;"><div class="label">💡 靈魂私語</div><div id="soulAdvice" class="value" style="color:#fff176"></div></div>
 
         <div class="mood-selector">
             <div class="mood-btns" id="moodContainer"></div>
@@ -157,34 +187,34 @@
     function seededRandom(seed) { var x = Math.sin(seed) * 10000; return x - Math.floor(x); }
 
     const tarotData = [
-        {name:"0. 愚者",desc:"代表純真、新的冒險與無限可能。這是一個提醒你/妳放下恐懼，勇敢踏出舒適圈的時刻。"},
-        {name:"1. 魔術師",desc:"代表創造力與掌握資源。你/妳擁有成功所需的一切工具，現在是將想法付諸行動的絕佳機會。"},
-        {name:"2. 女祭司",desc:"代表直覺、潛意識與神秘智慧。答案就藏在你/妳的直覺裡。"},
-        {name:"3. 皇后",desc:"代表豐盛、母性與美感。這是一個充滿吸引力的時刻，適合享受生活。"},
-        {name:"4. 皇帝",desc:"代表紀律、穩定與領導力。建立明確的秩序與規範能帶給你/妳安全感。"},
-        {name:"5. 教皇",desc:"代表傳統、指引與精神啟示。尋求長輩或導師的建議會有所收穫。"},
-        {name:"6. 戀人",desc:"代表和諧、選擇與關係。請以愛為出發點，尋求心靈上的平衡。"},
-        {name:"7. 戰車",desc:"代表意志、克服障礙與勝利。只要下定決心並保持專注。"},
-        {name:"8. 力量",desc:"代表勇氣、韌性與耐性。溫柔的力量有時比剛強更有用。"},
-        {name:"9. 隱士",desc:"代表內省、孤獨與沉澱。在獨處中思考，你/妳會找到真正的真理。"},
+        {name:"0. 愚者",desc:"代表純真、新的冒險與無限可能。提醒你放下恐懼，勇敢邁向未知。"},
+        {name:"1. 魔術師",desc:"代表創造力與掌握資源。你擁有轉化現實的力量，現在是將想法付諸行動的時刻。"},
+        {name:"2. 女祭司",desc:"代表直覺與內在智慧。靜下心來，答案就在你的靈魂深處。"},
+        {name:"3. 皇后",desc:"代表豐盛與美感。這是一個被愛包圍的時刻，適合創造與享受。"},
+        {name:"4. 皇帝",desc:"代表穩定的秩序。建立結構能帶給你安全感與明確的方向。"},
+        {name:"5. 教皇",desc:"代表精神上的指引。有時傳統的智慧能為當下的困惑解套。"},
+        {name:"6. 戀人",desc:"代表和諧與連結。以愛為核心做出選擇，你會發現平衡的力量。"},
+        {name:"7. 戰車",desc:"代表堅強的意志力。保持專注，你將克服障礙達成目標。"},
+        {name:"8. 力量",desc:"代表韌性。溫柔的堅持往往比剛強更有影響力。"},
+        {name:"9. 隱士",desc:"代表內省。在孤獨中沉澱，你會看見最真實的光。"},
         {name:"10. 命運之輪",desc:"代表轉機、輪迴與不可預期的變化。接受當下的變動。"},
-        {name:"11. 正義",desc:"代表公平、誠實與因果平衡。誠實面對自己，收穫應得的果。"},
-        {name:"12. 倒吊人",desc:"代表犧牲、等待與換位思考。停滯並非退步，而是為了讓你/妳換個角度看世界。"},
+        {name:"11. 正義",desc:"代表公平、誠實與因果平衡。誠實面對自己，你會獲得應得的果。"},
+        {name:"12. 倒吊人",desc:"代表犧牲、等待與換位思考。停滯並非退步，而是為了讓你換個角度看世界。"},
         {name:"13. 死神",desc:"代表結束、轉化與重生。唯有徹底的結束，新的生命才能萌芽。"},
-        {name:"14. 節制",desc:"代表調和、平和與心靈鍊金。平衡生活中的極端能帶給你/妳平靜。"},
+        {name:"14. 節制",desc:"代表調和、平和與心靈鍊金。平衡生活中的極端能帶給你平靜。"},
         {name:"15. 惡魔",desc:"代表束縛、慾望與覺察。今日是打破枷鎖的好日子。"},
         {name:"16. 高塔",desc:"代表震撼、突變與重建。不穩固的結構會倒塌，是為了建立更穩定的未來。"},
         {name:"17. 星星",desc:"代表希望、療癒與平靜。願望的種子正在萌芽，保持正向的心態。"},
-        {name:"18. 月亮",desc:"代表不安、幻象與潛意識。試著穿透迷霧，信任你/妳的靈魂覺察力。"},
-        {name:"19. 太陽",desc:"代表成功、活力與純真。你/妳正處於光芒萬丈的時刻。"},
-        {name:"20. 審判",desc:"代表重生、覺醒與使命召喚。聽從靈魂呼喚，迎接全新的你/妳。"},
+        {name:"18. 月亮",desc:"代表不安、幻象與潛意識。試著穿透迷霧，信任你的靈魂覺察力。"},
+        {name:"19. 太陽",desc:"代表成功、活力與純真。你正處於光芒萬丈的時刻。"},
+        {name:"20. 審判",desc:"代表重生、覺醒與使命召喚。聽從靈魂的呼喚，迎接全新的你。"},
         {name:"21. 世界",desc:"代表圓滿、達成與完美落幕。帶着智慧進入下一個篇章。"}
     ];
 
-    const pre = ["現在的你/妳", "你/妳的直覺", "這段時間", "某個念頭", "內在的你/妳", "當下的能量", "宇宙的頻率", "靈魂深處", "這份寂靜", "此刻的心情", "生活", "身邊的人"];
-    const mid = ["正悄悄引導你/妳", "提醒你/妳要記得", "正溫溫地洗滌", "將會轉化成", "正試著告訴你/妳", "正緩緩照亮", "幫助你/妳去重新", "正邀請你/妳一同", "正悄悄治癒", "支持你/妳勇敢", "正在醞釀一份", "正試著放開"];
+    const pre = ["現在的你", "你的直覺", "這段時間", "某個念頭", "內在的你", "當下的能量", "宇宙的頻率", "靈魂深處", "這份寂靜", "此刻的心情", "生活", "身邊的人"];
+    const mid = ["正悄悄引導你", "提醒你要記得", "正溫柔地洗滌", "將會轉化成", "正試著告訴你", "正緩緩照亮", "幫助你去重新", "正邀請你一同", "正悄悄治癒", "支持你勇敢", "正在醞釀一份", "正試著放開"];
     const aux = ["去", "能", "會", "將", "要"];
-    const suf = ["擁抱內心的光", "放下不必要的重擔", "看見生命的美感", "遇見美好的驚喜", "找回最純真的笑容", "創造屬於你/妳的奇蹟", "體驗當下的豐盛", "達成心靈的和解", "獲得深層的平靜", "發現潛藏的寶藏", "穿越眼前的迷霧", "點燃靈魂的熱情"];
+    const suf = ["擁抱內心的光", "放下不必要的重擔", "看見生命的美感", "遇見美好的驚喜", "找回最純真的笑容", "創造屬於你的奇蹟", "體驗當下的豐盛", "達成心靈的和解", "獲得深層的平靜", "發現潛藏的寶藏", "穿越眼前的迷霧", "點燃靈魂的熱情"];
 
     const pool = ["喝手搖飲","大口吃肉","買新衣服","整理房間","跟貓說話","深呼吸","早點睡覺","聯絡老友","去圖書館","換個髮型","大笑三聲","冥想五分","買份禮物","寫日記","修剪指甲","換新床單","運動排汗","聽音樂","看場電影","嘗試新菜","讚美別人","斷捨離","發呆放空","存一點錢","勇敢拒絕","主動道歉","練習瑜伽","喝溫開水","聽PODCAST","逛花市","洗泡泡浴","拍美照","抱抱腦公","看風景","準時下班","早起吃早餐","練習感恩","閱讀新書","玩場遊戲","整理相簿","唱歌紓壓","點香氛燈","吃水果","喝熱可可","做伸展操","買束鮮花","研究星盤","修剪頭髮","寫張卡片","對鏡子笑","聽海浪聲","赤腳踩地","修剪眉毛","喝杯好茶","看夕陽","早起看日出","吃塊巧克力","看紀錄片","逛展覽","做手工藝","噴喜歡的香水","寫封電子郵件","整理桌面","練習書法","煮一鍋湯","去公園走走","拉伸背部","吃一份甜點","看星座運勢","整理錢包","洗車","練習深蹲","早半小時起床","換個手機桌布","修剪盆栽","聽老歌","看風景照","喝杯檸檬水","做家事","去咖啡廳","看雲朵","整理通訊錄","練習正念","吃清淡一點","早點關燈","寫下夢境","觀察路人","去河邊散步","整理電腦文件","洗熱水澡","換雙好穿的鞋","給自己買咖啡","看有趣漫畫","練習畫畫","整理飾品","聽雨聲","給自己一個讚","做頭部按摩","看星空","寫感謝名單","聽蟬鳴","去廟裡走走","練習專注","吃當季蔬菜","換件亮色的衣服","早點吃晚餐","練習呼吸法","修整指甲邊緣","聽一場演講","練習愛自己","去市場逛逛","看藝術畫集","喝溫牛奶","練習微笑"];
 
@@ -214,7 +244,6 @@
         document.getElementById('todo').innerText = pool[todoIdx];
         document.getElementById('notodo').innerText = pool[notodoIdx === todoIdx ? (notodoIdx + 1) % pool.length : notodoIdx];
 
-        // 靈魂私語：含助動詞與提前逗號
         const p = pre[Math.floor(seededRandom(hourlySeed) * pre.length)];
         const m = mid[Math.floor(seededRandom(hourlySeed + 3) * mid.length)];
         const a = aux[Math.floor(seededRandom(hourlySeed + 5) * aux.length)];
@@ -226,16 +255,16 @@
     }
 
     const moods = [
-        {e:'😊', f:'宇宙收到了你/妳的喜悅，今天會加倍幸運！'},
-        {e:'😌', f:'平靜是最高級的能量，你/妳正處於最好的頻率。'},
-        {e:'🥺', f:'沒事的，宇宙正溫柔地抱著你/妳。'},
-        {e:'😴', f:'累了就休息吧，夢境裡有給你/妳的禮物。'},
-        {e:'🔥', f:'這股動力很棒！去創造屬於你/妳的奇蹟吧。'},
+        {e:'😊', f:'宇宙收到了你的喜悅，今天會加倍幸運！'},
+        {e:'😌', f:'平靜是最高級的能量，你正處於最好的頻率。'},
+        {e:'🥺', f:'沒事的，宇宙正溫柔地抱著你。'},
+        {e:'😴', f:'累了就休息吧，夢境裡有給你的禮物。'},
+        {e:'🔥', f:'這股動力很棒！去創造屬於你的奇蹟吧。'},
         {e:'🫣', f:'好事正悄悄發生喔。'},
-        {e:'🤔', f:'正在思考嗎？答案就在你/妳心底。'},
-        {e:'😏', f:'你/妳已經掌控了一切，宇宙為妳喝采。'},
-        {e:'😰', f:'壓力大嗎？星星會守護你/妳度過暗礁。'},
-        {e:'🫥', f:'想隱身一下也沒關係，宇宙允許你/妳暫時留白。'}
+        {e:'🤔', f:'正在思考嗎？答案就在你心底。'},
+        {e:'😏', f:'你已經掌控了一切，宇宙為你喝采。'},
+        {e:'😰', f:'壓力大嗎？星星會守護你度過暗礁。'},
+        {e:'🫥', f:'想隱身一下也沒關係，宇宙允許你暫時留白。'}
     ];
 
     function renderMoods() {
